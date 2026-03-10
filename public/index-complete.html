@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOF基金查询系统 - 完整版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .search-box button {
+            padding: 15px 30px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: #2980b9;
+        }
+        
+        .search-results {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .result-item:hover {
+            background: #e3f2fd;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-info h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .result-info .code {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .add-btn {
+            padding: 8px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .add-btn:hover {
+            background: #219653;
+        }
+        
+        .add-btn.added {
+            background: #95a5a6;
+            cursor: default;
+        }
+        
+        .data-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .data-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .data-card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            font-size: 1.4em;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .data-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .data-label {
+            color: #7f8c8d;
+            font-size: 0.95em;
+        }
+        
+        .data-value {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        
+        .data-value.highlight {
+            color: #e74c3c;
+            font-size: 1.3em;
+        }
+        
+        .data-value.highlight-est {
+            color: #3498db;
+            font-size: 1.3em;
+        }
+        
+        .daily-change {
+            font-size: 0.9em;
+            margin-left: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .daily-change.positive {
+            color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+        
+        .daily-change.negative {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+        
+        .data-source {
+            font-size: 0.8em;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        
+        .watchlist-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .watchlist-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+        
+        .watchlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .watchlist-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .watchlist-item:hover {
+            background: #e8f4fc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .watchlist-item:active {
+            transform: translateY(0);
+        }
+        
+        .watchlist-item::after {
+            content: '点击查看详情';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8em;
+            color: #3498db;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        
+        .watchlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .watchlist-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .remove-btn {
+            padding: 5px 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+        
+        .watchlist-data {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .footer-stats {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .data-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 LOF基金查询系统</h1>
+            <p class="subtitle">实时净值、场内价格、折溢价率一站式查询</p>
+        </header>
+        
+        <!-- 搜索和添加关注区域 -->
+        <section class="search-section">
+            <h2>🔍 搜索并添加关注</h2>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="输入基金代码或名称，如：162411 或 华宝油气">
+                <button onclick="searchFund()">搜索</button>
+            </div>
+            
+            <div id="searchResults" class="search-results">
+                <div class="loading">输入基金代码或名称开始搜索...</div>
+            </div>
+            
+            <div id="messageArea"></div>
+        </section>
+        
+        <!-- 数据展示区域 -->
+        <section class="data-section">
+            <div class="data-card">
+                <h2>📊 基金详情</h2>
+                <div id="fundDetail">
+                    <div class="loading">搜索并选择基金查看详情</div>
+                </div>
+            </div>
+            
+            <div class="data-card">
+                <h2>💰 价格分析</h2>
+                <div id="priceAnalysis">
+                    <div class="loading">等待数据加载...</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 关注列表区域 -->
+        <section class="watchlist-section">
+            <h2>⭐ 我的关注列表</h2>
+            <div id="watchlist" class="watchlist-grid">
+                <div class="loading">正在加载关注列表...</div>
+            </div>
+        </section>
+        
+        <!-- 页脚统计 -->
+        <div class="footer-stats">
+            <div>服务器状态: <span id="serverStatus">连接中...</span></div>
+            <div>数据更新时间: <span id="updateTime">--:--:--</span></div>
+            <div>关注基金数: <span id="fundCount">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        // 当前选中的基金
+        let currentFund = null;
+        // 关注列表
+        let watchlist = [];
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWatchlist();
+            updateServerStatus();
+            setInterval(updateServerStatus, 30000); // 每30秒更新状态
+        });
+        
+        // 搜索基金
+        async function searchFund() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                showMessage('请输入搜索关键词', 'error');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<div class="loading">搜索中...</div>';
+            
+            try {
+                const response = await fetch(`/api/search?keyword=${encodeURIComponent(keyword)}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    displaySearchResults(data.data);
+                } else {
+                    resultsDiv.innerHTML = '<div class="loading">未找到相关基金</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error-message">搜索失败: ${error.message}</div>`;
+            }
+        }
+        
+        // 显示搜索结果
+        function displaySearchResults(funds) {
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (funds.length === 0) {
+                resultsDiv.innerHTML = '<div class="loading">未找到相关基金</div>';
+                return;
+            }
+            
+            let html = '';
+            funds.forEach(fund => {
+                const isInWatchlist = watchlist.some(item => item.code === fund.code);
+                
+                html += `
+                    <div class="result-item" onclick="selectFund('${fund.code}')">
+                        <div class="result-info">
+                            <h3>${fund.name}</h3>
+                            <div class="code">${fund.code} | ${fund.type}</div>
+                        </div>
+                        <button class="add-btn ${isInWatchlist ? 'added' : ''}" 
+                                onclick="addToWatchlist('${fund.code}', '${fund.name}'); event.stopPropagation();"
+                                ${isInWatchlist ? 'disabled' : ''}>
+                            ${isInWatchlist ? '已关注' : '+ 关注'}
+                        </button>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // 选择基金查看详情
+        async function selectFund(code) {
+            currentFund = code;
+            
+            // 更新搜索框
+            document.getElementById('searchInput').value = code;
+            
+            // 加载基金详情
+            await loadFundDetail(code);
+        }
+        
+        // 加载基金详情
+        async function loadFundDetail(code) {
+            const detailDiv = document.getElementById('fundDetail');
+            const analysisDiv = document.getElementById('priceAnalysis');
+            
+            detailDiv.innerHTML = '<div class="loading">加载基金数据...</div>';
+            analysisDiv.innerHTML = '<div class="loading">计算价格分析...</div>';
+            
+            try {
+                const response = await fetch(`/api/fund/${code}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayFundDetail(data.data);
+                    displayPriceAnalysis(data.data);
+                } else {
+                    detailDiv.innerHTML = `<div class="error-message">加载失败: ${data.message}</div>`;
+                }
+            } catch (error) {
+                detailDiv.innerHTML = `<div class="error-message">加载失败: ${error.message}</div>`;
+            }
+        }
+        
+        // 显示基金详情
+        function displayFundDetail(fund) {
+            const detailDiv = document.getElementById('fundDetail');
+            
+            let html = `
+                <div class="data-row">
+                    <div class="data-label">基金名称</div>
+                    <div class="data-value">${fund.name}</div>
+                </div>
+                
+                <div class="data-row">
+                    <div class="data-label">基金代码</div>
+                    <div class="data-value">${fund.code}</div>
+                </div>
+                
+                <div class="data-row">
+                    <div class="data-label">📊 官方净值</div>
+                    <div class="data-value">${fund.official.netValue}</div>
+                </div>
+                <div class="data-source">${fund.official.date} | ${fund.official.source}</div>
+                
+                <div class="data-row">
+                    <div class="data-label">📈 实时估值</div>
+                    <div class="data-value">${fund.estimation.netValue} 
+                    ${fund.estimation.dailyChange && fund.estimation.dailyChange !== '--' ? 
+                    `<span class="daily-change ${fund.estimation.dailyChange.includes('-') ? 'negative' : 'positive'}">${fund.estimation.dailyChange}</span>` : 
+                    ''}
+                    </div>
+                </div>
+                <div class="data-source">${fund.estimation.source}</div>
+                
+                <div class="data-row">
+                    <div class="data-label">🏛️ 场内价格</div>
+                    <div class="data-value">${fund.market.price}</div>
+                </div>
+                <div class="data-source">${fund.market.source}</div>
+            `;
+            
+            detailDiv.innerHTML = html;
+        }
+        
+        // 显示价格分析
+        function displayPriceAnalysis(fund) {
+            const analysisDiv = document.getElementById('priceAnalysis');
+            
+            // 判断是否显示基于估值的折溢价率
+            const showEstPremium = fund.calculations.premiumRateEst && fund.calculations.premiumRateEst !== '--';
+            
+            let html = `
+                <div class="data-row">
+                    <div class="data-label">💰 折溢价率（官方净值）</div>
+                    <div class="data-value highlight">${fund.calculations.premiumRate}</div>
+                </div>
+            `;
+            
+            // 如果存在基于估值的折溢价率，则显示
+            if (showEstPremium) {
+                html += `
+                <div class="data-row">
+                    <div class="data-label">💰 折溢价率（实时估值）</div>
+                    <div class="data-value highlight-est">${fund.calculations.premiumRateEst}</div>
+                </div>
+                `;
+            }
+            
+            html += `
+                <div class="data-row">
+                    <div class="data-label">📊 估值差异</div>
+                    <div class="data-value">${fund.calculations.estimationDiff || '--'}</div>
+                </div>
+                
+                <div class="data-row">
+                    <div class="data-label">⏰ 更新时间</div>
+                    <div class="data-value">${fund.calculations.updateTime}</div>
+                </div>
+                
+                <div class="data-row">
+                    <div class="data-label">📋 申购状态</div>
+                    <div class="data-value">${fund.estimation.subscriptionStatus || '--'}</div>
+                </div>
+                
+                <div class="data-row">
+                    <div class="data-label">💰 限购金额</div>
+                    <div class="data-value">${fund.estimation.purchaseLimit || '无限制'}</div>
+                </div>
+            `;
+            
+            analysisDiv.innerHTML = html;
+        }
+        
+        // 添加到关注列表
+        async function addToWatchlist(code, name) {
+            // 检查是否已关注
+            if (watchlist.some(item => item.code === code)) {
+                showMessage('该基金已在关注列表中', 'info');
+                return;
+            }
+            
+            try {
+                // 这里可以调用后端API添加关注
+                // 暂时使用前端存储
+                const newItem = {
+                    code: code,
+                    name: name,
+                    addedAt: new Date().toLocaleString()
+                };
+                
+                watchlist.push(newItem);
+                saveWatchlist();
+                
+                showMessage(`成功关注 ${name} (${code})`, 'success');
+                loadWatchlist();
+                
+                // 更新搜索结果中的按钮状态
+                updateSearchResults();
+                
+            } catch (error) {
+                showMessage(`关注失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 从关注列表移除
+        function removeFromWatchlist(code) {
+            watchlist = watchlist.filter(item => item.code !== code);
+            saveWatchlist();
+            showMessage(`已取消关注 ${code}`, 'info');
+            loadWatchlist();
+            updateSearchResults();
+        }
+        
+        // 加载关注列表
+        function loadWatchlist() {
+            // 从localStorage加载
+            const saved = localStorage.getItem('lof_watchlist');
+            if (saved) {
+                try {
+                    watchlist = JSON.parse(saved);
+                } catch (e) {
+                    watchlist = [];
+                }
+            }
+            
+            displayWatchlist();
+            updateFundCount();
+        }
+        
+        // 保存关注列表
+        function saveWatchlist() {
+            localStorage.setItem('lof_watchlist', JSON.stringify(watchlist));
+        }
+        
+        // 显示关注列表
+        function displayWatchlist() {
+            const watchlistDiv = document.getElementById('watchlist');
+            
+            if (watchlist.length === 0) {
+                watchlistDiv.innerHTML = '<div class="loading">暂无关注基金，搜索并添加关注</div>';
+                return;
+            }
+            
+            let html = '';
+            watchlist.forEach(item => {
+                html += `
+                    <div class="watchlist-item" onclick="loadFundFromWatchlist('${item.code}', '${item.name.replace(/'/g, "\\'")}')">
+                        <div class="watchlist-header">
+                            <div class="watchlist-name">${item.name}</div>
+                            <button class="remove-btn" onclick="removeFromWatchlist('${item.code}'); event.stopPropagation();">移除</button>
+                        </div>
+                        <div class="watchlist-data">
+                            <div>代码: ${item.code}</div>
+                            <div>关注时间: ${item.addedAt}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            watchlistDiv.innerHTML = html;
+        }
+        
+        // 更新搜索结果显示
+        function updateSearchResults() {
+            const resultsDiv = document.getElementById('searchResults');
+            const items = resultsDiv.querySelectorAll('.result-item');
+            
+            items.forEach(item => {
+                const code = item.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+                if (code) {
+                    const isInWatchlist = watchlist.some(item => item.code === code);
+                    const button = item.querySelector('.add-btn');
+                    
+                    if (button) {
+                        if (isInWatchlist) {
+                            button.textContent = '已关注';
+                            button.classList.add('added');
+                            button.disabled = true;
+                        } else {
+                            button.textContent = '+ 关注';
+                            button.classList.remove('added');
+                            button.disabled = false;
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新服务器状态
+        async function updateServerStatus() {
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('serverStatus');
+                if (data.success) {
+                    statusDiv.innerHTML = '<span style="color: #27ae60;">✅ 正常</span>';
+                } else {
+                    statusDiv.innerHTML = '<span style="color: #e74c3c;">❌ 异常</span>';
+                }
+                
+                // 更新时间
+                document.getElementById('updateTime').textContent = new Date().toLocaleTimeString('zh-CN');
+                
+            } catch (error) {
+                document.getElementById('serverStatus').innerHTML = '<span style="color: #e74c3c;">❌ 连接失败</span>';
+            }
+        }
+        
+        // 更新基金数量
+        function updateFundCount() {
+            document.getElementById('fundCount').textContent = watchlist.length;
+        }
+        
+        // 显示消息
+        function showMessage(message, type = 'info') {
+            const messageArea = document.getElementById('messageArea');
+            
+            let className = type === 'error' ? 'error-message' : 
+                           type === 'success' ? 'success-message' : 'loading';
+            
+            messageArea.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            // 3秒后自动清除
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 3000);
+        }
+        
+        // 从关注列表加载基金详情
+        async function loadFundFromWatchlist(code, name) {
+            try {
+                // 显示加载状态
+                showMessage(`正在加载 ${name} (${code}) 的详细信息...`, 'info');
+                
+                // 清空搜索框
+                document.getElementById('searchInput').value = code;
+                
+                // 设置当前基金代码
+                currentFund = code;
+                
+                // 调用现有的加载函数
+                await loadFundDetail(code);
+                
+                // 滚动到详情区域
+                document.getElementById('fundDetail').scrollIntoView({ behavior: 'smooth' });
+                
+                showMessage(`成功加载 ${name} 的详细信息`, 'success');
+            } catch (error) {
+                showMessage(`加载基金详情失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 支持回车搜索
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchFund();
+            }
+        });
+    </script>
+</body>
+</html>

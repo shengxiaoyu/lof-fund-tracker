@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.secure
+.env.example
+
+# Database files
+*.db
+*.sqlite
+*.db-journal
+
+# Logs
+*.log
+logs/
+server-output.log
+server.log
+secure-app.log
+simple-app.log
+server-monitor.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build files
+dist/
+build/
+
+# SSL certificates
+ssl/
+*.pem
+*.key
+*.crt
+
+# Temporary files
+tmp/
+temp/

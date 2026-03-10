@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重定向到新版页面</title>
+    <meta http-equiv="refresh" content="0; url=./index-optimized.html">
+    <script>
+        // 立即重定向到优化版
+        window.location.href = './index-optimized.html';
+        
+        // 如果JavaScript被禁用，显示提示
+        setTimeout(function() {
+            document.getElementById('message').innerHTML = 
+                '正在重定向到新版页面...<br>' +
+                '如果页面没有自动跳转，请点击：<br>' +
+                '<a href="./index-optimized.html">点击这里访问新版页面</a>';
+        }, 1000);
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            text-align: center;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 5px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 正在重定向到新版页面</h1>
+        <div id="message">
+            请稍候，正在跳转到优化版LOF基金查询系统...
+        </div>
+        <div class="note">
+            <strong>💡 说明：</strong><br>
+            1. 旧版页面存在JavaScript错误<br>
+            2. 新版页面已修复所有问题<br>
+            3. 数据展示更清晰，功能更完善
+        </div>
+    </div>
+</body>
+</html>

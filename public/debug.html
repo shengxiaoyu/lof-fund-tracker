@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端问题诊断</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section.passed {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+        .test-section.failed {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+        .button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0b7dda;
+        }
+        .log {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .data-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 前端问题诊断工具</h1>
+        
+        <div class="test-section">
+            <h3>1. 测试JavaScript环境</h3>
+            <button class="button" onclick="testJS()">测试JS执行</button>
+            <div id="jsTestResult" class="log">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 测试API连接（无认证）</h3>
+            <button class="button" onclick="testAPIConnection()">测试API连接</button>
+            <div id="apiTestResult" class="log">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 获取基金数据</h3>
+            <button class="button" onclick="getFundData()">获取162411数据</button>
+            <div id="fundTestResult" class="log">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. 测试搜索功能</h3>
+            <button class="button" onclick="testSearch()">搜索"油气"</button>
+            <div id="searchTestResult" class="log">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. 检查控制台错误</h3>
+            <button class="button" onclick="checkConsole()">检查JS错误</button>
+            <div id="consoleResult" class="log">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>6. 显示API原始数据</h3>
+            <button class="button" onclick="showRawData()">显示原始数据</button>
+            <div id="rawDataResult" class="log">点击按钮显示...</div>
+        </div>
+        
+        <div id="dataDisplay" class="data-display">
+            <h3>数据展示区域</h3>
+            <div id="fundData">暂无数据</div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 15px; background: #fff3cd; border-radius: 5px;">
+            <h3>💡 诊断说明：</h3>
+            <p>1. 点击每个测试按钮，查看结果</p>
+            <p>2. 如果某个测试失败，说明该功能有问题</p>
+            <p>3. 按 <strong>F12</strong> 打开开发者工具，查看控制台错误</p>
+            <p>4. 截图失败结果发给我</p>
+        </div>
+    </div>
+
+    <script>
+        let testLog = [];
+        
+        // 添加日志
+        function addLog(section, message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${section}: ${message}`;
+            testLog.push({section, message, type, timestamp});
+            
+            // 更新显示
+            const element = document.getElementById(section + 'Result');
+            if (element) {
+                element.innerHTML = `<span class="${type}">${logEntry}</span>`;
+                element.scrollTop = element.scrollHeight;
+            }
+            
+            console.log(logEntry);
+        }
+        
+        // 1. 测试JavaScript环境
+        function testJS() {
+            try {
+                addLog('jsTest', '开始测试JavaScript环境...', 'info');
+                
+                // 测试基本JS功能
+                const testArray = [1, 2, 3];
+                const testObject = {code: '162411', name: '测试'};
+                const testString = 'JavaScript测试';
+                
+                if (testArray.length === 3 && testObject.code === '162411') {
+                    addLog('jsTest', '✅ JavaScript环境正常', 'success');
+                } else {
+                    addLog('jsTest', '❌ JavaScript环境异常', 'error');
+                }
+                
+            } catch (error) {
+                addLog('jsTest', `❌ JavaScript错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 2. 测试API连接
+        async function testAPIConnection() {
+            try {
+                addLog('apiTest', '正在测试API连接...', 'info');
+                
+                const response = await fetch('/api/test');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('apiTest', `✅ API连接成功: ${data.message}`, 'success');
+                } else {
+                    addLog('apiTest', `❌ API连接失败: ${data.message}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog('apiTest', `❌ API连接错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 3. 获取基金数据
+        async function getFundData() {
+            try {
+                addLog('fundTest', '正在获取基金数据...', 'info');
+                
+                const response = await fetch('/api/fund/162411');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('fundTest', `✅ 数据获取成功: ${data.message}`, 'success');
+                    
+                    // 显示数据
+                    displayFundData(data.data);
+                } else {
+                    addLog('fundTest', `❌ 数据获取失败: ${data.message}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog('fundTest', `❌ 数据获取错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 显示基金数据
+        function displayFundData(fund) {
+            const displayDiv = document.getElementById('fundData');
+            
+            const html = `
+                <h4>${fund.name} (${fund.code})</h4>
+                <p><strong>官方净值:</strong> ${fund.official.netValue} (${fund.official.date})</p>
+                <p><strong>实时估值:</strong> ${fund.estimation.netValue}</p>
+                <p><strong>场内价格:</strong> ${fund.market.price}</p>
+                <p><strong>折溢价率:</strong> ${fund.calculations.premiumRate}</p>
+                <p><strong>更新时间:</strong> ${fund.calculations.updateTime}</p>
+            `;
+            
+            displayDiv.innerHTML = html;
+        }
+        
+        // 4. 测试搜索功能
+        async function testSearch() {
+            try {
+                addLog('searchTest', '正在测试搜索功能...', 'info');
+                
+                const response = await fetch('/api/search?keyword=油气');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const count = data.data.length;
+                    addLog('searchTest', `✅ 搜索成功: 找到 ${count} 个基金`, 'success');
+                    
+                    if (count > 0) {
+                        const funds = data.data.map(f => `${f.code} - ${f.name}`).join(', ');
+                        addLog('searchTest', `找到的基金: ${funds}`, 'info');
+                    }
+                } else {
+                    addLog('searchTest', `❌ 搜索失败: ${data.message}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog('searchTest', `❌ 搜索错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 5. 检查控制台错误
+        function checkConsole() {
+            try {
+                addLog('consoleResult', '检查JavaScript错误...', 'info');
+                
+                // 模拟一个可能出错的函数
+                const testErrorFunction = () => {
+                    try {
+                        // 尝试访问可能不存在的属性
+                        const test = window.nonExistentProperty;
+                        return '无错误';
+                    } catch (error) {
+                        return `捕获到错误: ${error.message}`;
+                    }
+                };
+                
+                const result = testErrorFunction();
+                addLog('consoleResult', `✅ JavaScript错误检查: ${result}`, 'success');
+                
+            } catch (error) {
+                addLog('consoleResult', `❌ 检查过程中出错: ${error.message}`, 'error');
+            }
+        }
+        
+        // 6. 显示原始数据
+        async function showRawData() {
+            try {
+                addLog('rawDataResult', '正在获取原始数据...', 'info');
+                
+                const response = await fetch('/api/fund/162411');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                addLog('rawDataResult', '✅ 原始数据获取成功', 'success');
+                
+                // 显示原始JSON
+                const rawDataDiv = document.getElementById('rawDataResult');
+                rawDataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+            } catch (error) {
+                addLog('rawDataResult', `❌ 获取原始数据错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 页面加载时自动运行基本测试
+        window.onload = function() {
+            addLog('jsTest', '页面加载完成', 'info');
+            testJS();
+            testAPIConnection();
+        };
+    </script>
+</body>
+</html>
