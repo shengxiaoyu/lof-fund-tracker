@@ -4,7 +4,7 @@
   "description": "LOF基金查询网站 - 场内净值、场外现价、申购状态",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server-noauth.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {

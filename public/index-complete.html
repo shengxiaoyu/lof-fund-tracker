@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOF基金查询系统 - 完整版</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
         * {
             margin: 0;
@@ -440,7 +443,34 @@
             loadWatchlist();
             updateServerStatus();
             setInterval(updateServerStatus, 30000); // 每30秒更新状态
+            
+            // 自动更新关注列表中的基金名称（如果有需要更新的）
+            setTimeout(updateWatchlistFundNames, 5000);
         });
+        
+        // 更新关注列表中的基金名称
+        async function updateWatchlistFundNames() {
+            try {
+                const response = await fetch('/api/watchlist/update-names', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: 'default'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success && data.updated > 0) {
+                    console.log(`已更新 ${data.updated} 个基金名称`);
+                    // 重新加载关注列表以显示更新后的名称
+                    await loadWatchlist();
+                }
+            } catch (error) {
+                console.error('更新基金名称失败:', error);
+            }
+        }
         
         // 搜索基金
         async function searchFund() {
@@ -631,19 +661,28 @@
             }
             
             try {
-                // 这里可以调用后端API添加关注
-                // 暂时使用前端存储
-                const newItem = {
-                    code: code,
-                    name: name,
-                    addedAt: new Date().toLocaleString()
-                };
+                // 调用后端API添加关注
+                const response = await fetch('/api/watchlist/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        name: name,
+                        user_id: 'default'
+                    })
+                });
                 
-                watchlist.push(newItem);
-                saveWatchlist();
+                const data = await response.json();
                 
-                showMessage(`成功关注 ${name} (${code})`, 'success');
-                loadWatchlist();
+                if (data.success) {
+                    showMessage(`成功关注 ${name} (${code})`, 'success');
+                    // 重新加载关注列表
+                    await loadWatchlist();
+                } else {
+                    showMessage(`关注失败: ${data.error}`, 'error');
+                }
                 
                 // 更新搜索结果中的按钮状态
                 updateSearchResults();
@@ -654,33 +693,61 @@
         }
         
         // 从关注列表移除
-        function removeFromWatchlist(code) {
-            watchlist = watchlist.filter(item => item.code !== code);
-            saveWatchlist();
-            showMessage(`已取消关注 ${code}`, 'info');
-            loadWatchlist();
-            updateSearchResults();
+        async function removeFromWatchlist(code) {
+            try {
+                const response = await fetch('/api/watchlist/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        user_id: 'default'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(`已取消关注 ${code}`, 'info');
+                    // 重新加载关注列表
+                    await loadWatchlist();
+                } else {
+                    showMessage(`取消关注失败: ${data.error}`, 'error');
+                }
+                
+                updateSearchResults();
+                
+            } catch (error) {
+                showMessage(`取消关注失败: ${error.message}`, 'error');
+            }
         }
         
         // 加载关注列表
-        function loadWatchlist() {
-            // 从localStorage加载
-            const saved = localStorage.getItem('lof_watchlist');
-            if (saved) {
-                try {
-                    watchlist = JSON.parse(saved);
-                } catch (e) {
+        async function loadWatchlist() {
+            try {
+                const response = await fetch('/api/watchlist?user_id=default');
+                const data = await response.json();
+                
+                if (data.success) {
+                    watchlist = data.data;
+                    displayWatchlist();
+                    updateFundCount();
+                } else {
+                    showMessage(`加载关注列表失败: ${data.error}`, 'error');
                     watchlist = [];
                 }
+            } catch (error) {
+                console.error('加载关注列表失败:', error);
+                showMessage(`加载关注列表失败: ${error.message}`, 'error');
+                watchlist = [];
             }
-            
-            displayWatchlist();
-            updateFundCount();
         }
         
-        // 保存关注列表
+        // 保存关注列表（兼容函数，实际已使用后端API）
         function saveWatchlist() {
-            localStorage.setItem('lof_watchlist', JSON.stringify(watchlist));
+            // 不再使用localStorage，但保留函数以防万一
+            console.log('关注列表已保存到服务器');
         }
         
         // 显示关注列表
